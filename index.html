@@ -625,6 +625,142 @@ async function ewMergePDFs() {
 }
 </script>
 
+
+<div class="card">
+  <h3>🖼️ Image Resizer</h3>
+  <p>Resize images for free and download them. Your image stays in your browser.</p>
+
+  <input type="file" id="ew-image-file" accept="image/*"
+    style="width:100%;margin:12px 0;">
+
+  <div id="ew-image-controls" style="display:none;">
+    <img id="ew-image-preview" alt="Image preview"
+      style="display:block;max-width:100%;max-height:250px;margin:12px auto;border-radius:8px;">
+
+    <label for="ew-image-width">Width (pixels)</label>
+    <input type="number" id="ew-image-width" min="1" max="10000"
+      style="width:100%;margin:8px 0;">
+
+    <label for="ew-image-height">Height (pixels)</label>
+    <input type="number" id="ew-image-height" min="1" max="10000"
+      style="width:100%;margin:8px 0;">
+
+    <label style="display:block;margin:12px 0;">
+      <input type="checkbox" id="ew-image-ratio" checked>
+      Keep original proportions
+    </label>
+
+    <button type="button" onclick="ewResizeImage()">Resize &amp; Download</button>
+    <p id="ew-image-status" aria-live="polite"></p>
+  </div>
+</div>
+
+<script>
+(function () {
+  const fileInput = document.getElementById('ew-image-file');
+  const controls = document.getElementById('ew-image-controls');
+  const preview = document.getElementById('ew-image-preview');
+  const widthInput = document.getElementById('ew-image-width');
+  const heightInput = document.getElementById('ew-image-height');
+  const ratioCheck = document.getElementById('ew-image-ratio');
+  const status = document.getElementById('ew-image-status');
+
+  let image = new Image();
+  let imageUrl = '';
+
+  fileInput.addEventListener('change', function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      status.textContent = 'Please choose a valid image file.';
+      controls.style.display = 'none';
+      return;
+    }
+
+    if (imageUrl) URL.revokeObjectURL(imageUrl);
+    imageUrl = URL.createObjectURL(file);
+    image = new Image();
+
+    image.onload = function () {
+      preview.src = imageUrl;
+      widthInput.value = image.naturalWidth;
+      heightInput.value = image.naturalHeight;
+      controls.style.display = 'block';
+      status.textContent = 'Image loaded: ' +
+        image.naturalWidth + ' × ' + image.naturalHeight + ' pixels.';
+    };
+
+    image.onerror = function () {
+      status.textContent = 'Could not open this image. Please try another file.';
+    };
+
+    image.src = imageUrl;
+  });
+
+  widthInput.addEventListener('input', function () {
+    if (ratioCheck.checked && image.naturalWidth) {
+      heightInput.value = Math.max(1, Math.round(
+        Number(widthInput.value) * image.naturalHeight / image.naturalWidth
+      ));
+    }
+  });
+
+  heightInput.addEventListener('input', function () {
+    if (ratioCheck.checked && image.naturalHeight) {
+      widthInput.value = Math.max(1, Math.round(
+        Number(heightInput.value) * image.naturalWidth / image.naturalHeight
+      ));
+    }
+  });
+
+  window.ewResizeImage = function () {
+    const width = Number(widthInput.value);
+    const height = Number(heightInput.value);
+
+    if (!image.naturalWidth || !image.naturalHeight) {
+      status.textContent = 'Please upload an image first.';
+      return;
+    }
+
+    if (!Number.isInteger(width) || !Number.isInteger(height) ||
+        width < 1 || height < 1 || width > 10000 || height > 10000) {
+      status.textContent = 'Enter a width and height from 1 to 10000 pixels.';
+      return;
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) throw new Error('Canvas unavailable');
+
+      ctx.drawImage(image, 0, 0, width, height);
+
+      canvas.toBlob(function (blob) {
+        if (!blob) {
+          status.textContent = 'Could not create the resized image.';
+          return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'emerald-world-resized.png';
+        link.click();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+
+        status.textContent = 'Success! Your resized PNG has been downloaded.';
+      }, 'image/png');
+    } catch (error) {
+      status.textContent = 'Resizing failed. Please try another image.';
+    }
+  };
+})();
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

@@ -557,6 +557,74 @@ status.insertAdjacentElement('afterend', downloadButton);
 </script>
 
 
+
+<div class="card">
+  <h3>📄 PDF Merger</h3>
+  <p>Select two or more PDF files to combine them into one PDF. Files are processed in your browser.</p>
+
+  <input
+    type="file"
+    id="ew-pdf-files"
+    accept="application/pdf,.pdf"
+    multiple
+    style="width:100%;margin:12px 0;"
+  />
+
+  <button type="button" onclick="ewMergePDFs()">Merge PDFs</button>
+  <p id="ew-pdf-status" aria-live="polite"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script>
+async function ewMergePDFs() {
+  const input = document.getElementById('ew-pdf-files');
+  const status = document.getElementById('ew-pdf-status');
+  const files = Array.from(input.files || []);
+
+  if (files.length < 2) {
+    status.textContent = 'Please select at least two PDF files.';
+    return;
+  }
+
+  if (typeof PDFLib === 'undefined') {
+    status.textContent = 'PDF library could not load. Check your internet connection and try again.';
+    return;
+  }
+
+  status.textContent = 'Merging PDFs...';
+
+  try {
+    const mergedPdf = await PDFLib.PDFDocument.create();
+
+    for (const file of files) {
+      if (file.type && file.type !== 'application/pdf') {
+        throw new Error('Please select PDF files only.');
+      }
+
+      const bytes = await file.arrayBuffer();
+      const pdf = await PDFLib.PDFDocument.load(bytes);
+      const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+
+      pages.forEach(page => mergedPdf.addPage(page));
+    }
+
+    const mergedBytes = await mergedPdf.save();
+    const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = 'emerald-world-merged.pdf';
+    link.click();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    status.textContent = 'Success! Your merged PDF has been downloaded.';
+  } catch (error) {
+    status.textContent = 'Could not merge the PDFs. Check that your files are valid, unencrypted PDFs.';
+  }
+}
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

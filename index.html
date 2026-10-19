@@ -945,6 +945,178 @@ async function ewConvertWordToPDF() {
 }
 </script>
 
+
+<!-- Emerald World Image Compressor -->
+<div class="tool-card" id="ew-image-compressor" style="padding:20px;margin:20px 0;border-radius:14px;">
+  <h3>🗜️ Free Image Compressor</h3>
+  <p>Reduce image file sizes for free, right in your browser.</p>
+
+  <label for="ew-ic-file">Choose an image</label>
+  <input id="ew-ic-file" type="file" accept="image/*">
+
+  <div style="margin-top:14px;">
+    <label for="ew-ic-format">Output format</label>
+    <select id="ew-ic-format">
+      <option value="image/webp">WebP (recommended)</option>
+      <option value="image/jpeg">JPEG</option>
+    </select>
+  </div>
+
+  <div style="margin-top:14px;">
+    <label for="ew-ic-quality">Compression quality: <span id="ew-ic-quality-value">75%</span></label>
+    <input id="ew-ic-quality" type="range" min="10" max="95" value="75" style="width:100%;">
+  </div>
+
+  <button id="ew-ic-compress" type="button" style="margin-top:14px;">Compress Image</button>
+
+  <p id="ew-ic-status" role="status" aria-live="polite">Choose an image to begin.</p>
+  <p id="ew-ic-details"></p>
+
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:180px;">
+      <p><strong>Original image</strong></p>
+      <img id="ew-ic-original-preview" alt="Original image preview" style="display:none;max-width:100%;max-height:250px;border-radius:8px;">
+    </div>
+    <div style="flex:1;min-width:180px;">
+      <p><strong>Compressed image</strong></p>
+      <img id="ew-ic-result-preview" alt="Compressed image preview" style="display:none;max-width:100%;max-height:250px;border-radius:8px;">
+    </div>
+  </div>
+
+  <a id="ew-ic-download" style="display:none;margin-top:14px;" download="emerald-world-compressed.webp">⬇️ Download compressed image</a>
+</div>
+
+<script>
+(() => {
+  const fileInput = document.getElementById('ew-ic-file');
+  const formatInput = document.getElementById('ew-ic-format');
+  const qualityInput = document.getElementById('ew-ic-quality');
+  const qualityValue = document.getElementById('ew-ic-quality-value');
+  const compressButton = document.getElementById('ew-ic-compress');
+  const status = document.getElementById('ew-ic-status');
+  const details = document.getElementById('ew-ic-details');
+  const originalPreview = document.getElementById('ew-ic-original-preview');
+  const resultPreview = document.getElementById('ew-ic-result-preview');
+  const downloadLink = document.getElementById('ew-ic-download');
+
+  let selectedFile = null;
+  let originalUrl = null;
+  let resultUrl = null;
+
+  const formatBytes = bytes => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+  qualityInput.addEventListener('input', () => {
+    qualityValue.textContent = qualityInput.value + '%';
+  });
+
+  fileInput.addEventListener('change', () => {
+    selectedFile = fileInput.files && fileInput.files[0];
+    details.textContent = '';
+    downloadLink.style.display = 'none';
+    resultPreview.style.display = 'none';
+
+    if (resultUrl) URL.revokeObjectURL(resultUrl);
+    resultUrl = null;
+
+    if (!selectedFile) {
+      status.textContent = 'Choose an image to begin.';
+      originalPreview.style.display = 'none';
+      return;
+    }
+
+    if (!selectedFile.type.startsWith('image/')) {
+      selectedFile = null;
+      status.textContent = 'Please select a valid image file.';
+      return;
+    }
+
+    if (originalUrl) URL.revokeObjectURL(originalUrl);
+    originalUrl = URL.createObjectURL(selectedFile);
+    originalPreview.src = originalUrl;
+    originalPreview.style.display = 'block';
+    status.textContent = 'Image ready! Choose a format and quality, then click Compress Image.';
+    details.textContent = 'Original size: ' + formatBytes(selectedFile.size);
+  });
+
+  compressButton.addEventListener('click', () => {
+    if (!selectedFile) {
+      status.textContent = 'Please choose an image first.';
+      return;
+    }
+
+    status.textContent = 'Compressing image…';
+    details.textContent = '';
+    downloadLink.style.display = 'none';
+
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Canvas is unavailable.');
+
+        const mimeType = formatInput.value;
+
+        if (mimeType === 'image/jpeg') {
+          context.fillStyle = '#ffffff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        context.drawImage(image, 0, 0);
+
+        canvas.toBlob(blob => {
+          if (!blob) {
+            status.textContent = 'Compression failed. Try another image.';
+            return;
+          }
+
+          if (resultUrl) URL.revokeObjectURL(resultUrl);
+          resultUrl = URL.createObjectURL(blob);
+
+          const extension = mimeType === 'image/jpeg' ? 'jpg' : 'webp';
+          resultPreview.src = resultUrl;
+          resultPreview.style.display = 'block';
+
+          downloadLink.href = resultUrl;
+          downloadLink.download = 'emerald-world-compressed.' + extension;
+          downloadLink.style.display = 'inline-block';
+
+          const difference = selectedFile.size - blob.size;
+          const change = selectedFile.size
+            ? Math.round((difference / selectedFile.size) * 100)
+            : 0;
+
+          details.textContent =
+            'Original: ' + formatBytes(selectedFile.size) +
+            ' · Compressed: ' + formatBytes(blob.size) +
+            (difference >= 0
+              ? ' · Saved ' + change + '%'
+              : ' · Output is ' + Math.abs(change) + '% larger');
+
+          status.textContent = 'Done! Your compressed image is ready to download.';
+        }, mimeType, Number(qualityInput.value) / 100);
+      } catch (error) {
+        status.textContent = 'Could not compress this image. Please try another file.';
+      }
+    };
+
+    image.onerror = () => {
+      status.textContent = 'This image could not be opened. Please try another file.';
+    };
+
+    image.src = originalUrl;
+  });
+})();
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

@@ -1144,6 +1144,189 @@ onmouseleave="this.style.boxShadow='0 0 12px rgba(0,255,100,0.08)';this.style.bo
 })();
 </script>
 
+<div id="ew-typing-test" style="background:#101713;border:1px solid #16834a;border-radius:16px;padding:24px;margin:24px 0;color:#e8f5ec;box-shadow:0 0 12px rgba(0,255,100,.08);">
+  <h3 style="color:#39ff88;margin-top:0;font-size:23px;">⌨️ Free Typing Speed Test</h3>
+  <p style="color:#b8c9be;">Test your typing speed, accuracy, and mistakes. Challenge yourself to improve!</p>
+
+  <div style="display:flex;flex-wrap:wrap;gap:12px;margin:18px 0;">
+    <div style="flex:1;min-width:100px;background:#0b110d;border:1px solid #254b32;border-radius:10px;padding:14px;text-align:center;">
+      <div style="color:#9eb5a5;font-size:13px;">Speed</div>
+      <strong id="ew-tt-wpm" style="display:block;color:#39ff88;font-size:28px;">0</strong>
+      <span style="font-size:12px;">WPM</span>
+    </div>
+    <div style="flex:1;min-width:100px;background:#0b110d;border:1px solid #254b32;border-radius:10px;padding:14px;text-align:center;">
+      <div style="color:#9eb5a5;font-size:13px;">Accuracy</div>
+      <strong id="ew-tt-accuracy" style="display:block;color:#39ff88;font-size:28px;">100%</strong>
+    </div>
+    <div style="flex:1;min-width:100px;background:#0b110d;border:1px solid #254b32;border-radius:10px;padding:14px;text-align:center;">
+      <div style="color:#9eb5a5;font-size:13px;">Time</div>
+      <strong id="ew-tt-time" style="display:block;color:#39ff88;font-size:28px;">60</strong>
+      <span style="font-size:12px;">seconds left</span>
+    </div>
+    <div style="flex:1;min-width:100px;background:#0b110d;border:1px solid #254b32;border-radius:10px;padding:14px;text-align:center;">
+      <div style="color:#9eb5a5;font-size:13px;">Mistakes</div>
+      <strong id="ew-tt-mistakes" style="display:block;color:#ff8a8a;font-size:28px;">0</strong>
+    </div>
+  </div>
+
+  <label for="ew-tt-duration" style="display:block;margin-bottom:8px;">⏱️ Test duration</label>
+  <select id="ew-tt-duration" style="width:100%;box-sizing:border-box;padding:12px;background:#17221b;border:1px solid #28633e;border-radius:9px;color:#e8f5ec;margin-bottom:16px;">
+    <option value="30">30 seconds</option>
+    <option value="60" selected>60 seconds</option>
+    <option value="120">120 seconds</option>
+  </select>
+
+  <div id="ew-tt-passage" style="background:#0b110d;border:1px solid #254b32;border-radius:10px;padding:16px;line-height:1.9;font-size:16px;overflow-wrap:anywhere;margin-bottom:14px;user-select:none;"></div>
+
+  <label for="ew-tt-input" style="display:block;margin-bottom:8px;">✍️ Type the text above here</label>
+  <textarea id="ew-tt-input" rows="4" placeholder="Click Start Test, then begin typing here..." disabled style="width:100%;box-sizing:border-box;padding:14px;background:#17221b;border:1px solid #28633e;border-radius:10px;color:#e8f5ec;font:inherit;resize:vertical;"></textarea>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+    <button id="ew-tt-start" type="button" style="padding:12px 18px;background:#16a34a;color:#fff;border:1px solid #39ff88;border-radius:9px;font-weight:bold;cursor:pointer;">▶ Start Test</button>
+    <button id="ew-tt-reset" type="button" style="padding:12px 18px;background:#17221b;color:#e8f5ec;border:1px solid #28633e;border-radius:9px;font-weight:bold;cursor:pointer;">↻ Restart</button>
+  </div>
+
+  <p id="ew-tt-status" role="status" aria-live="polite" style="color:#39ff88;margin-bottom:0;">Press Start Test when you're ready!</p>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('ew-typing-test');
+  if (!root || root.dataset.initialized === 'yes') return;
+  root.dataset.initialized = 'yes';
+
+  const $ = id => document.getElementById(id);
+  const passageBox = $('ew-tt-passage');
+  const input = $('ew-tt-input');
+  const startBtn = $('ew-tt-start');
+  const resetBtn = $('ew-tt-reset');
+  const durationSelect = $('ew-tt-duration');
+  const status = $('ew-tt-status');
+
+  const passages = [
+    'Learning new skills takes patience and practice. Every small improvement brings you closer to your goal. Keep trying, stay curious, and enjoy the journey.',
+    'Technology helps people learn, create, and solve problems. With a little creativity and consistent effort, anyone can build something useful and share it with the world.',
+    'A great day begins with a positive mindset. Set a clear goal, focus on one task at a time, and remember that progress matters more than perfection.',
+    'The internet connects people and ideas from around the world. Use it wisely to discover new knowledge, develop your skills, and turn your ideas into reality.'
+  ];
+
+  let passage = '';
+  let started = false;
+  let finished = false;
+  let remaining = 60;
+  let timer = null;
+  let startTime = 0;
+
+  function makePassage() {
+    const chosen = passages[Math.floor(Math.random() * passages.length)];
+    passage = (chosen + ' ').repeat(4).trim();
+    passageBox.textContent = passage;
+  }
+
+  function updateStats() {
+    const typed = input.value;
+    let correct = 0;
+    let mistakes = 0;
+
+    for (let i = 0; i < typed.length; i++) {
+      if (i < passage.length && typed[i] === passage[i]) correct++;
+      else mistakes++;
+    }
+
+    const elapsed = started
+      ? Math.max((Date.now() - startTime) / 60000, 1 / 60000)
+      : 0;
+
+    const wpm = elapsed > 0 ? Math.round((correct / 5) / elapsed) : 0;
+    const accuracy = typed.length
+      ? Math.round((correct / typed.length) * 100)
+      : 100;
+
+    $('ew-tt-wpm').textContent = wpm;
+    $('ew-tt-accuracy').textContent = accuracy + '%';
+    $('ew-tt-mistakes').textContent = mistakes;
+    $('ew-tt-time').textContent = remaining;
+
+    return { typed, correct, mistakes, wpm, accuracy };
+  }
+
+  function finishTest(message) {
+    if (finished) return;
+    finished = true;
+    started = false;
+    clearInterval(timer);
+    input.disabled = true;
+    startBtn.disabled = true;
+    startBtn.style.opacity = '0.6';
+
+    const stats = updateStats();
+    status.textContent = message + ' Final speed: ' + stats.wpm +
+      ' WPM · Accuracy: ' + stats.accuracy + '% · Mistakes: ' + stats.mistakes + '.';
+  }
+
+  function startTest() {
+    clearInterval(timer);
+    remaining = Number(durationSelect.value);
+    started = false;
+    finished = false;
+    startTime = 0;
+    input.value = '';
+    input.disabled = false;
+    durationSelect.disabled = true;
+    startBtn.disabled = true;
+    startBtn.style.opacity = '0.6';
+    status.textContent = 'Start typing the passage below!';
+    updateStats();
+    input.focus();
+  }
+
+  input.addEventListener('input', () => {
+    if (!started && !finished && input.value.length > 0) {
+      started = true;
+      startTime = Date.now();
+      timer = setInterval(() => {
+        remaining = Math.max(0, Number(durationSelect.value) -
+          Math.floor((Date.now() - startTime) / 1000));
+        updateStats();
+        if (remaining <= 0) finishTest('⏰ Time is up!');
+      }, 200);
+    }
+
+    const stats = updateStats();
+
+    if (stats.typed.length >= passage.length && !finished) {
+      finishTest('🎉 Passage completed!');
+    }
+  });
+
+  startBtn.addEventListener('click', startTest);
+
+  resetBtn.addEventListener('click', () => {
+    clearInterval(timer);
+    remaining = Number(durationSelect.value);
+    started = false;
+    finished = false;
+    startTime = 0;
+    input.value = '';
+    input.disabled = true;
+    durationSelect.disabled = false;
+    startBtn.disabled = false;
+    startBtn.style.opacity = '1';
+    makePassage();
+    updateStats();
+    status.textContent = 'Press Start Test when you are ready!';
+  });
+
+  durationSelect.addEventListener('change', () => {
+    remaining = Number(durationSelect.value);
+    updateStats();
+  });
+
+  makePassage();
+  updateStats();
+})();
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

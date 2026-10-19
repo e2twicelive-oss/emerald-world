@@ -477,6 +477,59 @@
       </div>
     </div>
 
+<div class="grid">
+  <div class="card">
+    <h3>📱 QR Code Generator</h3>
+    <p>Enter text or a website link to create a QR code.</p>
+
+    <input
+      id="ew-qr-input"
+      type="text"
+      placeholder="https://example.com"
+      style="width:100%;box-sizing:border-box;padding:12px;margin:10px 0;"
+    />
+
+    <button type="button" onclick="ewGenerateQR()">
+      Generate QR Code
+    </button>
+
+    <div id="ew-qr-output" style="margin-top:15px;text-align:center;"></div>
+    <p id="ew-qr-status" aria-live="polite"></p>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  function ewGenerateQR() {
+    const input = document.getElementById('ew-qr-input').value.trim();
+    const output = document.getElementById('ew-qr-output');
+    const status = document.getElementById('ew-qr-status');
+
+    output.innerHTML = '';
+    status.textContent = '';
+
+    if (!input) {
+      status.textContent = 'Please enter some text or a URL.';
+      return;
+    }
+
+    if (typeof QRCode === 'undefined') {
+      status.textContent = 'QR library could not load. Check your internet connection and try again.';
+      return;
+    }
+
+    new QRCode(output, {
+      text: input,
+      width: 200,
+      height: 200,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    status.textContent = 'Your QR code is ready!';
+  }
+</script>
+
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

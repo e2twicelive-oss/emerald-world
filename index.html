@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Emerald World is your free destination for online tools, games, study resources and blogs.">
+  <title>Emerald World | Everything in One Place</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #0b0f0d;
+      color: #f3f7f4;
+      line-height: 1.6;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 20px 7%;
+      border-bottom: 1px solid #26352c;
+      flex-wrap: wrap;
+    }
+
+    .logo { font-size: 23px; font-weight: 800; }
+    .logo span { color: #4ade80; }
+
+    nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    nav a {
+      color: #d2ddd5;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    nav a:hover { color: #4ade80; }
+
+    .hero {
+      text-align: center;
+      padding: 100px 20px 80px;
+      background: radial-gradient(ellipse at top, #163d29, #0b0f0d 68%);
+    }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid #286943;
+      color: #86efac;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 13px;
+      margin-bottom: 25px;
+    }
+
+    h1 {
+      font-size: clamp(38px, 7vw, 72px);
+      line-height: 1.1;
+      margin-bottom: 22px;
+    }
+
+    h1 span { color: #4ade80; }
+
+    .hero p {
+      color: #b3c2b7;
+      max-width: 600px;
+      margin: 0 auto 30px;
+      font-size: 17px;
+    }
+
+    .button {
+      display: inline-block;
+      background: #4ade80;
+      color: #07140b;
+      text-decoration: none;
+      padding: 13px 23px;
+      border-radius: 9px;
+      font-weight: bold;
+    }
+
+    .button:hover { background: #86efac; }
+
+    main { padding: 60px 7%; }
+    .section-title { text-align: center; margin-bottom: 35px; }
+    .section-title h2 { font-size: 32px; margin-bottom: 8px; }
+    .section-title p { color: #9eada2; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .card {
+      background: #121a15;
+      border: 1px solid #26382b;
+      border-radius: 15px;
+      padding: 26px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #4ade80;
+    }
+
+    .card .icon { font-size: 32px; margin-bottom: 12px; }
+    .card h3 { margin-bottom: 8px; font-size: 20px; }
+    .card p { color: #aab9ae; font-size: 14px; }
+
+    .about {
+      text-align: center;
+      background: #121a15;
+      border: 1px solid #26382b;
+      border-radius: 18px;
+      padding: 40px 25px;
+      margin-top: 60px;
+    }
+
+    .about p {
+      max-width: 650px;
+      color: #b3c2b7;
+      margin: 12px auto 0;
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px 15px;
+      border-top: 1px solid #26352c;
+      color: #91a196;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      header { justify-content: center; }
+      nav { justify-content: center; }
+      .hero { padding-top: 70px; }
+      main { padding: 45px 5%; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">💚 Emerald<span> World</span></div>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#explore">Explore</a>
+      <a href="#about">About</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <div class="tag">✦ One Platform. Endless Possibilities.</div>
+    <h1>Welcome to<br><span>Emerald World.</span></h1>
+    <p>
+      Discover free tools, explore games, learn something new,
+      and enjoy useful content — all in one place.
+      No paid features. Just more possibilities for everyone.
+    </p>
+    <a class="button" href="#explore">Explore Emerald World →</a>
+  </section>
+
+  <main id="explore">
+    <div class="section-title">
+      <h2>Explore Your World</h2>
+      <p>Something useful, interesting, or fun for everyone.</p>
+    </div>
+
+    <div class="grid">
+      <article class="card">
+        <div class="icon">🛠️</div>
+        <h3>Free Tools</h3>
+        <p>Discover useful online tools to simplify everyday tasks.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🎮</div>
+        <h3>Games</h3>
+        <p>Explore gaming guides, gaming news, and original games.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">📚</div>
+        <h3>Study</h3>
+        <p>Find helpful learning resources and educational content.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">📰</div>
+        <h3>Blogs & Articles</h3>
+        <p>Read interesting articles, guides, ideas, and discoveries.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">🎨</div>
+        <h3>Stories & Comics</h3>
+        <p>Discover original stories, comics, and creative worlds.</p>
+      </article>
+
+      <article class="card">
+        <div class="icon">✨</div>
+        <h3>More Things to Do</h3>
+        <p>Explore new experiences and features as Emerald World grows.</p>
+      </article>
+    </div>
+
+    <section class="about" id="about">
+      <h2>Built with a Bigger Vision 💚</h2>
+      <p>
+        Emerald World is my vision of a place where people can
+        find useful resources, learn, play, and explore without
+        paying for every feature. I'm building it step by step,
+        with new ideas and possibilities to come.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Emerald World. Built for everyone, with a vision to grow.
+  </footer>
+
+</body>
+</html>

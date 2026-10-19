@@ -4,220 +4,479 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Emerald World is your free destination for online tools, games, study resources and blogs.">
-  <title>Emerald World | Everything in One Place</title>
+  <meta name="theme-color" content="#080c09">
+  <meta name="description" content="Emerald World brings together free tools, games, study resources, blogs and creative experiences.">
+  <title>Emerald World — Explore More. Pay Nothing.</title>
   <style>
+    :root {
+      --bg: #080c09;
+      --panel: #101812;
+      --panel2: #141f17;
+      --green: #48f28b;
+      --muted: #a0afa4;
+      --border: #26392c;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html { scroll-behavior: smooth; }
+
     body {
-      font-family: Arial, sans-serif;
-      background: #0b0f0d;
-      color: #f3f7f4;
+      font-family: Inter, ui-sans-serif, system-ui, Arial, sans-serif;
+      background: var(--bg);
+      color: #f3f8f4;
       line-height: 1.6;
     }
 
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: min(1120px, 90%);
+      margin: auto;
+    }
+
     header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(8, 12, 9, .92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid #1b2a20;
+    }
+
+    .nav {
+      min-height: 76px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 20px;
-      padding: 20px 7%;
-      border-bottom: 1px solid #26352c;
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 850;
+      letter-spacing: -.8px;
+    }
+
+    .logo span { color: var(--green); }
+
+    nav {
+      display: flex;
+      align-items: center;
       flex-wrap: wrap;
+      gap: 24px;
     }
 
-    .logo { font-size: 23px; font-weight: 800; }
-    .logo span { color: #4ade80; }
-
-    nav { display: flex; gap: 20px; flex-wrap: wrap; }
     nav a {
-      color: #d2ddd5;
-      text-decoration: none;
+      color: #c3cec5;
       font-size: 14px;
+      transition: color .2s;
     }
-    nav a:hover { color: #4ade80; }
+
+    nav a:hover { color: var(--green); }
+
+    .nav-cta {
+      border: 1px solid #36754a;
+      padding: 9px 15px;
+      border-radius: 9px;
+      color: var(--green);
+    }
 
     .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 105px 0 90px;
       text-align: center;
-      padding: 100px 20px 80px;
-      background: radial-gradient(ellipse at top, #163d29, #0b0f0d 68%);
+      background:
+        radial-gradient(ellipse at 50% 0%, #173d25 0%, transparent 62%);
     }
 
-    .tag {
-      display: inline-block;
-      border: 1px solid #286943;
-      color: #86efac;
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 13px;
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border: 1px solid #224b30;
+      border-radius: 50%;
+      top: 40px;
+      left: calc(50% - 150px);
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #a6f6bd;
+      background: #12291a;
+      border: 1px solid #285c38;
+      border-radius: 50px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .5px;
       margin-bottom: 25px;
     }
 
-    h1 {
-      font-size: clamp(38px, 7vw, 72px);
-      line-height: 1.1;
-      margin-bottom: 22px;
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
     }
 
-    h1 span { color: #4ade80; }
+    h1 {
+      font-size: clamp(43px, 8vw, 82px);
+      letter-spacing: -4px;
+      line-height: 1.04;
+      margin-bottom: 24px;
+    }
+
+    h1 span {
+      display: block;
+      color: var(--green);
+    }
 
     .hero p {
-      color: #b3c2b7;
-      max-width: 600px;
-      margin: 0 auto 30px;
+      color: var(--muted);
+      max-width: 610px;
+      margin: 0 auto 32px;
       font-size: 17px;
     }
 
-    .button {
-      display: inline-block;
-      background: #4ade80;
-      color: #07140b;
-      text-decoration: none;
-      padding: 13px 23px;
-      border-radius: 9px;
-      font-weight: bold;
+    .actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 13px;
     }
 
-    .button:hover { background: #86efac; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 13px 21px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 750;
+      transition: transform .2s, background .2s;
+    }
 
-    main { padding: 60px 7%; }
-    .section-title { text-align: center; margin-bottom: 35px; }
-    .section-title h2 { font-size: 32px; margin-bottom: 8px; }
-    .section-title p { color: #9eada2; }
+    .btn:hover { transform: translateY(-2px); }
+
+    .primary {
+      background: var(--green);
+      color: #07120a;
+    }
+
+    .primary:hover { background: #82ffad; }
+
+    .secondary {
+      border: 1px solid #35453a;
+      background: #101812;
+    }
+
+    .secondary:hover { background: #19261c; }
+
+    .promise {
+      margin-top: 28px;
+      font-size: 12px;
+      color: #89998e;
+    }
+
+    .promise span { color: var(--green); }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: #0d130f;
+      margin-top: -1px;
+    }
+
+    .stat {
+      text-align: center;
+      padding: 23px 10px;
+    }
+
+    .stat + .stat { border-left: 1px solid var(--border); }
+
+    .stat strong {
+      display: block;
+      font-size: 17px;
+      color: var(--green);
+    }
+
+    .stat small { color: var(--muted); font-size: 12px; }
+
+    section.content { padding: 85px 0 25px; }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    .kicker {
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: clamp(27px, 4vw, 38px);
+      letter-spacing: -1.2px;
+      line-height: 1.2;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 310px;
+    }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 17px;
     }
 
     .card {
-      background: #121a15;
-      border: 1px solid #26382b;
+      position: relative;
+      min-height: 215px;
+      padding: 25px;
+      background: linear-gradient(145deg, #121b15, #0d130f);
+      border: 1px solid var(--border);
       border-radius: 15px;
-      padding: 26px;
-      transition: transform 0.2s, border-color 0.2s;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
     }
 
     .card:hover {
+      border-color: #418452;
       transform: translateY(-4px);
-      border-color: #4ade80;
     }
 
-    .card .icon { font-size: 32px; margin-bottom: 12px; }
-    .card h3 { margin-bottom: 8px; font-size: 20px; }
-    .card p { color: #aab9ae; font-size: 14px; }
+    .card-icon {
+      display: grid;
+      place-items: center;
+      width: 47px;
+      height: 47px;
+      border-radius: 12px;
+      background: #1b3021;
+      font-size: 23px;
+      margin-bottom: 22px;
+    }
 
-    .about {
+    .card h3 { font-size: 18px; margin-bottom: 9px; }
+
+    .card p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .arrow {
+      position: absolute;
+      right: 23px;
+      bottom: 22px;
+      color: var(--green);
+      font-size: 19px;
+    }
+
+    .vision {
+      margin: 75px 0;
+      padding: 44px 35px;
       text-align: center;
-      background: #121a15;
-      border: 1px solid #26382b;
+      border: 1px solid #285437;
       border-radius: 18px;
-      padding: 40px 25px;
-      margin-top: 60px;
+      background: radial-gradient(ellipse at top, #173b24, #0d130f 75%);
     }
 
-    .about p {
-      max-width: 650px;
-      color: #b3c2b7;
-      margin: 12px auto 0;
+    .vision h2 { margin-bottom: 15px; }
+
+    .vision p {
+      max-width: 640px;
+      margin: auto;
+      color: #b0c0b4;
+      font-size: 14px;
     }
+
+    .vision .btn { margin-top: 24px; }
 
     footer {
-      text-align: center;
-      padding: 28px 15px;
-      border-top: 1px solid #26352c;
-      color: #91a196;
-      font-size: 13px;
+      border-top: 1px solid #1b2a20;
+      padding: 27px 0;
     }
 
-    @media (max-width: 600px) {
-      header { justify-content: center; }
-      nav { justify-content: center; }
-      .hero { padding-top: 70px; }
-      main { padding: 45px 5%; }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    footer p, footer a {
+      font-size: 12px;
+      color: #91a095;
+    }
+
+    footer a:hover { color: var(--green); }
+
+    @media (max-width: 760px) {
+      .nav { padding: 17px 0; flex-direction: column; }
+      nav { justify-content: center; gap: 16px; }
+      .hero { padding: 75px 0 65px; }
+      h1 { letter-spacing: -2px; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section-head { align-items: start; flex-direction: column; }
+    }
+
+    @media (max-width: 480px) {
+      .grid { grid-template-columns: 1fr; }
+      .card { min-height: 190px; }
+      .stats { grid-template-columns: 1fr; }
+      .stat + .stat {
+        border-left: none;
+        border-top: 1px solid var(--border);
+      }
+      .vision { padding: 34px 20px; }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="logo">💚 Emerald<span> World</span></div>
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#explore">Explore</a>
-      <a href="#about">About</a>
-    </nav>
+    <div class="container nav">
+      <a class="logo" href="#home">💚 Emerald<span>World</span></a>
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#explore">Explore</a>
+        <a href="#about">Our Vision</a>
+        <a class="nav-cta" href="#explore">Discover More ↗</a>
+      </nav>
+    </div>
   </header>
 
-  <section class="hero" id="home">
-    <div class="tag">✦ One Platform. Endless Possibilities.</div>
-    <h1>Welcome to<br><span>Emerald World.</span></h1>
-    <p>
-      Discover free tools, explore games, learn something new,
-      and enjoy useful content — all in one place.
-      No paid features. Just more possibilities for everyone.
-    </p>
-    <a class="button" href="#explore">Explore Emerald World →</a>
-  </section>
+  <main>
+    <section class="hero" id="home">
+      <div class="container hero-content">
+        <div class="eyebrow"><span class="dot"></span> A WORLD OF POSSIBILITIES</div>
+        <h1>Explore More.<span>Pay Nothing.</span></h1>
+        <p>
+          Your place to discover useful tools, enjoy games, learn new things,
+          and explore fresh ideas. Everything starts here, with more to come.
+        </p>
+        <div class="actions">
+          <a class="btn primary" href="#explore">Explore Emerald World ↗</a>
+          <a class="btn secondary" href="#about">Discover Our Vision</a>
+        </div>
+        <div class="promise"><span>✦</span> Free to explore. Built to keep growing.</div>
+      </div>
+    </section>
 
-  <main id="explore">
-    <div class="section-title">
-      <h2>Explore Your World</h2>
-      <p>Something useful, interesting, or fun for everyone.</p>
+    <div class="container">
+      <div class="stats">
+        <div class="stat">
+          <strong>Tools</strong>
+          <small>Useful everyday resources</small>
+        </div>
+        <div class="stat">
+          <strong>Games</strong>
+          <small>Play and discover</small>
+        </div>
+        <div class="stat">
+          <strong>New Ideas</strong>
+          <small>A world that keeps growing</small>
+        </div>
+      </div>
     </div>
 
-    <div class="grid">
-      <article class="card">
-        <div class="icon">🛠️</div>
-        <h3>Free Tools</h3>
-        <p>Discover useful online tools to simplify everyday tasks.</p>
-      </article>
+    <section class="content" id="explore">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Discover your next thing</div>
+            <h2>One world. Many possibilities.</h2>
+          </div>
+          <p>Explore different corners of Emerald World, all in one place.</p>
+        </div>
 
-      <article class="card">
-        <div class="icon">🎮</div>
-        <h3>Games</h3>
-        <p>Explore gaming guides, gaming news, and original games.</p>
-      </article>
+        <div class="grid">
+          <a class="card" href="#about">
+            <div class="card-icon">🛠️</div>
+            <h3>Free Tools</h3>
+            <p>Discover handy tools designed to make everyday tasks easier.</p>
+            <span class="arrow">↗</span>
+          </a>
 
-      <article class="card">
-        <div class="icon">📚</div>
-        <h3>Study</h3>
-        <p>Find helpful learning resources and educational content.</p>
-      </article>
+          <a class="card" href="#about">
+            <div class="card-icon">🎮</div>
+            <h3>Games</h3>
+            <p>Explore gaming guides, interesting discoveries, and my own games.</p>
+            <span class="arrow">↗</span>
+          </a>
 
-      <article class="card">
-        <div class="icon">📰</div>
-        <h3>Blogs & Articles</h3>
-        <p>Read interesting articles, guides, ideas, and discoveries.</p>
-      </article>
+          <a class="card" href="#about">
+            <div class="card-icon">📚</div>
+            <h3>Study</h3>
+            <p>Find learning resources and useful information to explore.</p>
+            <span class="arrow">↗</span>
+          </a>
 
-      <article class="card">
-        <div class="icon">🎨</div>
-        <h3>Stories & Comics</h3>
-        <p>Discover original stories, comics, and creative worlds.</p>
-      </article>
+          <a class="card" href="#about">
+            <div class="card-icon">📰</div>
+            <h3>Blogs & Articles</h3>
+            <p>Read about games, technology, ideas, and topics worth exploring.</p>
+            <span class="arrow">↗</span>
+          </a>
 
-      <article class="card">
-        <div class="icon">✨</div>
-        <h3>More Things to Do</h3>
-        <p>Explore new experiences and features as Emerald World grows.</p>
-      </article>
-    </div>
+          <a class="card" href="#about">
+            <div class="card-icon">🎨</div>
+            <h3>Stories & Comics</h3>
+            <p>A future home for original stories, comics, and imaginative worlds.</p>
+            <span class="arrow">↗</span>
+          </a>
 
-    <section class="about" id="about">
-      <h2>Built with a Bigger Vision 💚</h2>
-      <p>
-        Emerald World is my vision of a place where people can
-        find useful resources, learn, play, and explore without
-        paying for every feature. I'm building it step by step,
-        with new ideas and possibilities to come.
-      </p>
+          <a class="card" href="#about">
+            <div class="card-icon">✨</div>
+            <h3>More Things to Do</h3>
+            <p>Discover more experiences as new ideas become part of the platform.</p>
+            <span class="arrow">↗</span>
+          </a>
+        </div>
+
+        <section class="vision" id="about">
+          <div class="kicker">The idea behind it all</div>
+          <h2>More access. More possibilities.</h2>
+          <p>
+            I created Emerald World with a simple vision: bring useful resources,
+            entertainment, learning, and creativity together in one place.
+            I want every feature I offer to be free to use, with new ideas and
+            experiences added as the project grows.
+          </p>
+          <a class="btn primary" href="#home">Back to the top ↑</a>
+        </section>
+      </div>
     </section>
   </main>
 
   <footer>
-    © 2026 Emerald World. Built for everyone, with a vision to grow.
+    <div class="container footer-inner">
+      <a class="logo" href="#home">Emerald<span>World</span></a>
+      <p>© 2026 Emerald World · Made with a vision to grow 💚</p>
+      <a href="#home">Back to top ↑</a>
+    </div>
   </footer>
 
 </body>

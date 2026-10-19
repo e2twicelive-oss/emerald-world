@@ -1327,6 +1327,211 @@ onmouseleave="this.style.boxShadow='0 0 12px rgba(0,255,100,0.08)';this.style.bo
 })();
 </script>
 
+<div id="ew-image-to-pdf" style="background:#101713;border:1px solid #16834a;border-radius:16px;padding:24px;margin:24px 0;color:#e8f5ec;box-shadow:0 0 12px rgba(0,255,100,.08);">
+  <h3 style="color:#39ff88;margin-top:0;font-size:23px;">🖼️ Free Image to PDF Converter</h3>
+  <p style="color:#b8c9be;">Convert one or multiple images into a downloadable PDF. Your files are processed in your browser.</p>
+
+  <label for="ew-i2p-files" style="display:block;margin:16px 0 8px;">📁 Choose images</label>
+  <input id="ew-i2p-files" type="file" accept="image/*" multiple style="display:block;width:100%;box-sizing:border-box;padding:12px;background:#17221b;border:1px solid #28633e;border-radius:9px;color:#e8f5ec;">
+
+  <div style="margin-top:16px;">
+    <label for="ew-i2p-size" style="display:block;margin-bottom:8px;">📄 PDF page size</label>
+    <select id="ew-i2p-size" style="width:100%;box-sizing:border-box;padding:12px;background:#17221b;border:1px solid #28633e;border-radius:9px;color:#e8f5ec;">
+      <option value="a4">A4</option>
+      <option value="letter">Letter</option>
+      <option value="fit">Fit image to page</option>
+    </select>
+  </div>
+
+  <p style="color:#b8c9be;font-size:13px;">Images appear in the PDF in the order shown below. Use the arrows to change their order.</p>
+  <div id="ew-i2p-list" style="display:grid;gap:10px;margin:16px 0;"></div>
+
+  <button id="ew-i2p-create" type="button" style="padding:12px 18px;background:#16a34a;color:#fff;border:1px solid #39ff88;border-radius:9px;font-weight:bold;cursor:pointer;">📄 Create PDF</button>
+
+  <p id="ew-i2p-status" role="status" aria-live="polite" style="color:#39ff88;margin-top:16px;">Choose your images to begin.</p>
+  <a id="ew-i2p-download" style="display:none;margin-top:8px;padding:12px 18px;background:#16a34a;color:#fff;border:1px solid #39ff88;border-radius:9px;text-decoration:none;font-weight:bold;" download="emerald-world-images.pdf">⬇️ Download PDF</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(() => {
+  const root = document.getElementById('ew-image-to-pdf');
+  if (!root || root.dataset.initialized === 'yes') return;
+  root.dataset.initialized = 'yes';
+
+  const $ = id => document.getElementById(id);
+  const fileInput = $('ew-i2p-files');
+  const list = $('ew-i2p-list');
+  const status = $('ew-i2p-status');
+  const createButton = $('ew-i2p-create');
+  const download = $('ew-i2p-download');
+  const sizeSelect = $('ew-i2p-size');
+
+  let files = [];
+  let pdfUrl = null;
+
+  function renderList() {
+    list.replaceChildren();
+
+    files.forEach((file, index) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:10px;background:#0b110d;border:1px solid #254b32;border-radius:10px;';
+
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.alt = 'Selected image ' + (index + 1);
+      img.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:7px;';
+
+      const info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:100px;overflow-wrap:anywhere;';
+      const name = document.createElement('div');
+      name.textContent = (index + 1) + '. ' + file.name;
+      name.style.color = '#e8f5ec';
+      const size = document.createElement('small');
+      size.textContent = (file.size / 1024).toFixed(1) + ' KB';
+      size.style.color = '#9eb5a5';
+      info.append(name, size);
+
+      const controls = document.createElement('div');
+      controls.style.cssText = 'display:flex;gap:5px;';
+
+      [
+        ['↑', 'Move image up', -1],
+        ['↓', 'Move image down', 1],
+        ['✕', 'Remove image', 0]
+      ].forEach(([label, title, direction]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.title = title;
+        button.setAttribute('aria-label', title);
+        button.style.cssText = 'padding:7px 10px;background:#17221b;color:#39ff88;border:1px solid #28633e;border-radius:7px;cursor:pointer;';
+
+        if (direction === -1) button.disabled = index === 0;
+        if (direction === 1) button.disabled = index === files.length - 1;
+
+        button.addEventListener('click', () => {
+          if (direction === 0) {
+            files.splice(index, 1);
+          } else {
+            const target = index + direction;
+            if (target < 0 || target >= files.length) return;
+            [files[index], files[target]] = [files[target], files[index]];
+          }
+          renderList();
+          status.textContent = files.length
+            ? files.length + ' image(s) selected.'
+            : 'Choose your images to begin.';
+        });
+
+        controls.appendChild(button);
+      });
+
+      row.append(img, info, controls);
+      list.appendChild(row);
+    });
+  }
+
+  fileInput.addEventListener('change', () => {
+    files = Array.from(fileInput.files || []).filter(file => file.type.startsWith('image/'));
+    if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    pdfUrl = null;
+    download.style.display = 'none';
+    renderList();
+    status.textContent = files.length
+      ? files.length + ' image(s) selected. You can reorder them before creating the PDF.'
+      : 'Please select at least one valid image.';
+  });
+
+  createButton.addEventListener('click', async () => {
+    if (!files.length) {
+      status.textContent = 'Please choose at least one image first.';
+      return;
+    }
+
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+      status.textContent = 'PDF library did not load. Check your internet connection and refresh the page.';
+      return;
+    }
+
+    createButton.disabled = true;
+    download.style.display = 'none';
+    status.textContent = 'Creating your PDF…';
+
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+      for (let i = 0; i < files.length; i++) {
+        status.textContent = 'Processing image ' + (i + 1) + ' of ' + files.length + '…';
+
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error('Could not read image.'));
+          reader.readAsDataURL(files[i]);
+        });
+
+        const image = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error('Could not open ' + files[i].name));
+          img.src = dataUrl;
+        });
+
+        const format = files[i].type === 'image/png' ? 'PNG' :
+          files[i].type === 'image/webp' ? 'WEBP' : 'JPEG';
+
+        let pageWidth = 210;
+        let pageHeight = 297;
+
+        if (sizeSelect.value === 'letter') {
+          pageWidth = 215.9;
+          pageHeight = 279.4;
+        } else if (sizeSelect.value === 'fit') {
+          pageWidth = image.naturalWidth * 0.264583;
+          pageHeight = image.naturalHeight * 0.264583;
+          pageWidth = Math.min(Math.max(pageWidth, 10), 1000);
+          pageHeight = Math.min(Math.max(pageHeight, 10), 1000);
+        }
+
+        if (i > 0) doc.addPage([pageWidth, pageHeight], 'portrait');
+        else if (sizeSelect.value !== 'a4') {
+          doc.deletePage(1);
+          doc.addPage([pageWidth, pageHeight], 'portrait');
+        }
+
+        if (sizeSelect.value === 'a4' || sizeSelect.value === 'letter') {
+          doc.setPage(i + 1);
+          const margin = 8;
+          const scale = Math.min(
+            (pageWidth - margin * 2) / image.naturalWidth,
+            (pageHeight - margin * 2) / image.naturalHeight
+          );
+          const width = image.naturalWidth * scale;
+          const height = image.naturalHeight * scale;
+          doc.addImage(dataUrl, format, (pageWidth - width) / 2, (pageHeight - height) / 2, width, height);
+        } else {
+          doc.setPage(i + 1);
+          doc.addImage(dataUrl, format, 0, 0, pageWidth, pageHeight);
+        }
+      }
+
+      const blob = doc.output('blob');
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+      pdfUrl = URL.createObjectURL(blob);
+      download.href = pdfUrl;
+      download.style.display = 'inline-block';
+      status.textContent = '✅ PDF created successfully! ' + files.length + ' image(s) included.';
+    } catch (error) {
+      status.textContent = 'Could not create the PDF. Try using JPG or PNG images.';
+    } finally {
+      createButton.disabled = false;
+    }
+  });
+})();
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

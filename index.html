@@ -866,6 +866,85 @@ async function ewCopyPassword() {
 }
 </script>
     
+
+<div class="card">
+  <h3>📄 Word to PDF Converter</h3>
+  <p>Convert Word documents (.docx) into PDF files for free.</p>
+
+  <input type="file" id="ew-word-file"
+    accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    style="width:100%;margin:12px 0;">
+
+  <button type="button" onclick="ewConvertWordToPDF()">Convert to PDF</button>
+  <p id="ew-word-status" aria-live="polite"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+
+<script>
+async function ewConvertWordToPDF() {
+  const input = document.getElementById('ew-word-file');
+  const status = document.getElementById('ew-word-status');
+  const file = input.files[0];
+
+  if (!file) {
+    status.textContent = 'Please select a Word .docx file first.';
+    return;
+  }
+
+  if (!file.name.toLowerCase().endsWith('.docx')) {
+    status.textContent = 'Please select a .docx Word document.';
+    return;
+  }
+
+  if (typeof mammoth === 'undefined' || typeof html2pdf === 'undefined') {
+    status.textContent = 'A conversion library could not load. Check your internet connection and refresh.';
+    return;
+  }
+
+  status.textContent = 'Converting your document...';
+
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.convertToHtml({ arrayBuffer });
+    const html = result.value.trim();
+
+    if (!html || !html.replace(/<[^>]*>/g, '').trim()) {
+      status.textContent = 'This document appears to be empty or contains no readable text.';
+      return;
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = html;
+    wrapper.style.cssText =
+      'font-family:Arial,sans-serif;font-size:12px;line-height:1.5;color:#111;overflow-wrap:anywhere;';
+
+    wrapper.querySelectorAll('script,iframe,object,embed,form').forEach(el => el.remove());
+    wrapper.querySelectorAll('*').forEach(el => {
+      el.removeAttribute('style');
+      el.removeAttribute('class');
+      el.removeAttribute('id');
+    });
+
+    const safeName = file.name.replace(/\.docx$/i, '') || 'document';
+
+    await html2pdf().set({
+      margin: 12,
+      filename: safeName + '.pdf',
+      image: { type: 'jpeg', quality: 0.95 },
+      html2canvas: { scale: 2, useCORS: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    }).from(wrapper).save();
+
+    status.textContent = 'Success! Your PDF download should begin shortly.';
+  } catch (error) {
+    status.textContent = 'Conversion failed. Please try another .docx file.';
+  }
+}
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

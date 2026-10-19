@@ -1533,6 +1533,172 @@ onmouseleave="this.style.boxShadow='0 0 12px rgba(0,255,100,0.08)';this.style.bo
 })();
 </script>
 
+
+<div id="ew-text-to-speech" style="background:#101713;border:1px solid #16834a;border-radius:16px;padding:24px;margin:24px 0;color:#e8f5ec;box-shadow:0 0 12px rgba(0,255,100,.08);">
+  <h3 style="color:#39ff88;margin-top:0;font-size:23px;">🔊 Free Text to Speech</h3>
+  <p style="color:#b8c9be;">Turn your text into spoken words using your browser's available voices.</p>
+
+  <label for="ew-tts-text" style="display:block;margin:16px 0 8px;">📝 Enter your text</label>
+  <textarea id="ew-tts-text" rows="6" maxlength="10000" placeholder="Type or paste something you want to hear..." style="width:100%;box-sizing:border-box;padding:14px;background:#17221b;border:1px solid #28633e;border-radius:10px;color:#e8f5ec;font:inherit;resize:vertical;"></textarea>
+  <p id="ew-tts-count" style="font-size:13px;color:#9eb5a5;margin-top:6px;">0 / 10000 characters</p>
+
+  <div style="margin-top:16px;">
+    <label for="ew-tts-voice" style="display:block;margin-bottom:8px;">🗣️ Choose a voice</label>
+    <select id="ew-tts-voice" style="width:100%;box-sizing:border-box;padding:12px;background:#17221b;border:1px solid #28633e;border-radius:9px;color:#e8f5ec;">
+      <option value="">Loading available voices...</option>
+    </select>
+  </div>
+
+  <div style="margin-top:18px;">
+    <label for="ew-tts-speed" style="display:block;margin-bottom:8px;">⚡ Speaking speed: <strong id="ew-tts-speed-value" style="color:#39ff88;">1×</strong></label>
+    <input id="ew-tts-speed" type="range" min="0.5" max="2" step="0.1" value="1" style="width:100%;accent-color:#39ff88;">
+  </div>
+
+  <div style="margin-top:18px;">
+    <label for="ew-tts-pitch" style="display:block;margin-bottom:8px;">🎵 Voice pitch: <strong id="ew-tts-pitch-value" style="color:#39ff88;">1</strong></label>
+    <input id="ew-tts-pitch" type="range" min="0.5" max="2" step="0.1" value="1" style="width:100%;accent-color:#39ff88;">
+  </div>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:20px;">
+    <button id="ew-tts-speak" type="button" style="padding:12px 18px;background:#16a34a;color:white;border:1px solid #39ff88;border-radius:9px;font-weight:bold;cursor:pointer;">▶ Speak</button>
+    <button id="ew-tts-pause" type="button" style="padding:12px 18px;background:#17221b;color:#e8f5ec;border:1px solid #28633e;border-radius:9px;font-weight:bold;cursor:pointer;">⏸ Pause</button>
+    <button id="ew-tts-resume" type="button" style="padding:12px 18px;background:#17221b;color:#e8f5ec;border:1px solid #28633e;border-radius:9px;font-weight:bold;cursor:pointer;">▶ Resume</button>
+    <button id="ew-tts-stop" type="button" style="padding:12px 18px;background:#17221b;color:#e8f5ec;border:1px solid #28633e;border-radius:9px;font-weight:bold;cursor:pointer;">⏹ Stop</button>
+  </div>
+
+  <p id="ew-tts-status" role="status" aria-live="polite" style="color:#39ff88;margin-bottom:0;">Ready! Enter some text and click Speak.</p>
+</div>
+
+<script>
+(() => {
+  const root = document.getElementById('ew-text-to-speech');
+  if (!root || root.dataset.initialized === 'yes') return;
+  root.dataset.initialized = 'yes';
+
+  const $ = id => document.getElementById(id);
+  const textInput = $('ew-tts-text');
+  const voiceSelect = $('ew-tts-voice');
+  const speedInput = $('ew-tts-speed');
+  const pitchInput = $('ew-tts-pitch');
+  const status = $('ew-tts-status');
+
+  if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+    status.textContent = 'Sorry, your browser does not support Text to Speech.';
+    $('ew-tts-speak').disabled = true;
+    return;
+  }
+
+  let voices = [];
+
+  function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+    const previous = voiceSelect.value;
+    voiceSelect.replaceChildren();
+
+    if (!voices.length) {
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = 'Default voice (no voices listed yet)';
+      voiceSelect.appendChild(option);
+      return;
+    }
+
+    voices.forEach((voice, index) => {
+      const option = document.createElement('option');
+      option.value = String(index);
+      option.textContent = voice.name + ' (' + voice.lang + ')' +
+        (voice.default ? ' — Default' : '');
+      voiceSelect.appendChild(option);
+    });
+
+    if (previous && voices[Number(previous)]) {
+      voiceSelect.value = previous;
+    } else {
+      const defaultIndex = voices.findIndex(voice => voice.default);
+      voiceSelect.value = String(defaultIndex >= 0 ? defaultIndex : 0);
+    }
+
+    status.textContent = voices.length + ' voice(s) available. Ready to speak!';
+  }
+
+  window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  loadVoices();
+
+  textInput.addEventListener('input', () => {
+    $('ew-tts-count').textContent = textInput.value.length + ' / 10000 characters';
+  });
+
+  speedInput.addEventListener('input', () => {
+    $('ew-tts-speed-value').textContent = Number(speedInput.value).toFixed(1) + '×';
+  });
+
+  pitchInput.addEventListener('input', () => {
+    $('ew-tts-pitch-value').textContent = Number(pitchInput.value).toFixed(1);
+  });
+
+  $('ew-tts-speak').addEventListener('click', () => {
+    const text = textInput.value.trim();
+
+    if (!text) {
+      status.textContent = 'Please enter some text first.';
+      textInput.focus();
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const selectedIndex = Number(voiceSelect.value);
+
+    if (voiceSelect.value !== '' && voices[selectedIndex]) {
+      utterance.voice = voices[selectedIndex];
+    }
+
+    utterance.rate = Number(speedInput.value);
+    utterance.pitch = Number(pitchInput.value);
+
+    utterance.onstart = () => {
+      status.textContent = '🔊 Speaking now...';
+    };
+
+    utterance.onend = () => {
+      status.textContent = '✅ Finished speaking!';
+    };
+
+    utterance.onerror = event => {
+      if (event.error !== 'canceled' && event.error !== 'interrupted') {
+        status.textContent = 'Speech could not be played. Try another voice or browser.';
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  });
+
+  $('ew-tts-pause').addEventListener('click', () => {
+    if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+      window.speechSynthesis.pause();
+      status.textContent = '⏸ Speech paused.';
+    } else {
+      status.textContent = 'There is no active speech to pause.';
+    }
+  });
+
+  $('ew-tts-resume').addEventListener('click', () => {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+      status.textContent = '▶ Speech resumed.';
+    } else {
+      status.textContent = 'Speech is not paused.';
+    }
+  });
+
+  $('ew-tts-stop').addEventListener('click', () => {
+    window.speechSynthesis.cancel();
+    status.textContent = '⏹ Speech stopped.';
+  });
+})();
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

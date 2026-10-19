@@ -416,19 +416,174 @@
       </div>
     </section>
 
-    <section id="tools">
-      <div class="container">
-        <div class="section-heading">
-          <span class="eyebrow">Useful things, made accessible</span>
-          <h2>Your Free Tools Hub</h2>
-          <p>The long-term goal is to bring together a growing collection of useful tools in one place.</p>
-        </div>
-        <div class="about-box">
-          <h3>🛠️ More tools. More possibilities.</h3>
-          <p>Tools will be added as they become available. Some may open external websites, which can have their own terms and limitations.</p>
-        </div>
+
+<section id="tools">
+  <div class="container">
+    <div class="section-heading">
+      <span class="eyebrow">Free tools for everyone</span>
+      <h2>Your Free Tools Hub</h2>
+      <p>Useful tools and online resources, all in one place.</p>
+    </div>
+
+    <h3>🛠️ Tools that work right here</h3>
+    <div class="grid">
+      <div class="card">
+        <h3>📝 Word Counter</h3>
+        <p>Count words, characters and sentences in your text.</p>
+        <textarea id="ew-text" rows="5"
+          placeholder="Type or paste your text here..."
+          style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;"></textarea>
+        <p id="ew-count" aria-live="polite">Words: 0 | Characters: 0 | Sentences: 0</p>
       </div>
-    </section>
+
+      <div class="card">
+        <h3>🔠 Text Case Converter</h3>
+        <p>Convert text to uppercase, lowercase or title case.</p>
+        <textarea id="ew-case-input" rows="4"
+          placeholder="Enter text to convert..."
+          style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;"></textarea>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;">
+          <button type="button" onclick="ewConvert('upper')">UPPERCASE</button>
+          <button type="button" onclick="ewConvert('lower')">lowercase</button>
+          <button type="button" onclick="ewConvert('title')">Title Case</button>
+        </div>
+        <textarea id="ew-case-output" rows="4" readonly
+          aria-label="Converted text"
+          placeholder="Your converted text appears here..."
+          style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;margin-top:10px;"></textarea>
+        <button type="button" onclick="ewCopy()">Copy result</button>
+        <span id="ew-copy-status" aria-live="polite"></span>
+      </div>
+
+      <div class="card">
+        <h3>🧮 Simple Calculator</h3>
+        <p>Calculate using two numbers.</p>
+        <label for="ew-num1">First number</label>
+        <input id="ew-num1" type="number" step="any"
+          style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0;" />
+        <label for="ew-operation">Operation</label>
+        <select id="ew-operation"
+          style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0;">
+          <option value="+">Addition (+)</option>
+          <option value="-">Subtraction (−)</option>
+          <option value="*">Multiplication (×)</option>
+          <option value="/">Division (÷)</option>
+        </select>
+        <label for="ew-num2">Second number</label>
+        <input id="ew-num2" type="number" step="any"
+          style="width:100%;box-sizing:border-box;padding:12px;margin:8px 0;" />
+        <button type="button" onclick="ewCalculate()">Calculate</button>
+        <p id="ew-result" aria-live="polite">Result: —</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:35px;">🌐 More free online tools</h3>
+    <p>These tools open on external websites. Their free features and usage limits may change.</p>
+    <div class="grid">
+      <a class="card" href="https://www.ilovepdf.com/"
+         target="_blank" rel="noopener noreferrer">
+        <h3>📄 iLovePDF</h3>
+        <p>Explore online PDF tools for merging, splitting and converting files.</p>
+        <span class="card-link">Open external tool ↗</span>
+      </a>
+
+      <a class="card" href="https://www.photopea.com/"
+         target="_blank" rel="noopener noreferrer">
+        <h3>🎨 Photopea</h3>
+        <p>Edit images in your browser with an online photo editor.</p>
+        <span class="card-link">Open external tool ↗</span>
+      </a>
+
+      <a class="card" href="https://www.remove.bg/"
+         target="_blank" rel="noopener noreferrer">
+        <h3>🖼️ remove.bg</h3>
+        <p>Try an online tool for removing image backgrounds. Free use may be limited.</p>
+        <span class="card-link">Open external tool ↗</span>
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const ewText = document.getElementById('ew-text');
+
+    ewText.addEventListener('input', function () {
+      const text = this.value.trim();
+      const words = text ? text.split(/\s+/u).length : 0;
+      const characters = this.value.length;
+      const sentences = text
+        ? (text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [])
+            .filter(s => s.trim()).length
+        : 0;
+
+      document.getElementById('ew-count').textContent =
+        `Words: ${words} | Characters: ${characters} | Sentences: ${sentences}`;
+    });
+
+    function ewConvert(type) {
+      const input = document.getElementById('ew-case-input').value;
+      let output = input;
+
+      if (type === 'upper') output = input.toUpperCase();
+      if (type === 'lower') output = input.toLowerCase();
+      if (type === 'title') {
+        output = input.toLowerCase().replace(
+          /(^|[\s-])(\p{L})/gu,
+          (match, gap, letter) => gap + letter.toUpperCase()
+        );
+      }
+
+      document.getElementById('ew-case-output').value = output;
+      document.getElementById('ew-copy-status').textContent = '';
+    }
+
+    async function ewCopy() {
+      const output = document.getElementById('ew-case-output');
+      const status = document.getElementById('ew-copy-status');
+
+      if (!output.value) {
+        status.textContent = ' Convert some text first.';
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(output.value);
+        status.textContent = ' Copied!';
+      } catch {
+        output.select();
+        status.textContent = ' Select the text and copy it manually.';
+      }
+    }
+
+    function ewCalculate() {
+      const first = document.getElementById('ew-num1').value;
+      const second = document.getElementById('ew-num2').value;
+      const operation = document.getElementById('ew-operation').value;
+      const result = document.getElementById('ew-result');
+
+      if (first === '' || second === '') {
+        result.textContent = 'Please enter both numbers.';
+        return;
+      }
+
+      const a = Number(first);
+      const b = Number(second);
+      let answer;
+
+      if (operation === '+') answer = a + b;
+      if (operation === '-') answer = a - b;
+      if (operation === '*') answer = a * b;
+      if (operation === '/') {
+        if (b === 0) {
+          result.textContent = 'Cannot divide by zero.';
+          return;
+        }
+        answer = a / b;
+      }
+
+      result.textContent = 'Result: ' + answer;
+    }
+  </script>
+</section>
 
     <section id="blogs">
       <div class="container">

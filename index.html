@@ -549,7 +549,9 @@ downloadButton.onclick = function () {
   link.click();
 };
 
-output.appendChild(downloadButton);
+document.getElementById('ew-qr-download')?.remove();
+downloadButton.id = 'ew-qr-download';
+status.insertAdjacentElement('afterend', downloadButton);
 
   }
 </script>

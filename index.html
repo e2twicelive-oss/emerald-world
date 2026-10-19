@@ -525,7 +525,32 @@
       correctLevel: QRCode.CorrectLevel.H
     });
 
-    status.textContent = 'Your QR code is ready!';
+
+status.textContent = 'Your QR code is ready!';
+
+const downloadButton = document.createElement('button');
+downloadButton.type = 'button';
+downloadButton.textContent = '⬇️ Download QR Code';
+downloadButton.style.marginTop = '10px';
+
+downloadButton.onclick = function () {
+  const canvas = output.querySelector('canvas');
+  const image = output.querySelector('img');
+  const dataURL = canvas ? canvas.toDataURL('image/png') : image?.src;
+
+  if (!dataURL) {
+    status.textContent = 'Please generate the QR code again.';
+    return;
+  }
+
+  const link = document.createElement('a');
+  link.href = dataURL;
+  link.download = 'emerald-world-qr-code.png';
+  link.click();
+};
+
+output.appendChild(downloadButton);
+
   }
 </script>
 

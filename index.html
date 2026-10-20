@@ -1700,6 +1700,152 @@ onmouseleave="this.style.boxShadow='0 0 12px rgba(0,255,100,0.08)';this.style.bo
 </script>
 
 
+<section id="ew-qr-scanner" style="background:#101814;border:1px solid #176b45;border-radius:16px;padding:22px;margin:20px 0;color:#e8fff1;font-family:Arial,sans-serif;">
+  <h2 style="color:#39e68c;margin-top:0;">📷 Free QR Code Scanner</h2>
+  <p style="color:#b8d9c5;">Scan a QR code using your camera or upload an image containing a QR code.</p>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;">
+    <button id="ew-qr-start" type="button" style="background:#16a05d;color:white;border:0;border-radius:8px;padding:11px 16px;cursor:pointer;">📷 Start Camera</button>
+    <button id="ew-qr-stop" type="button" style="background:#293a31;color:white;border:1px solid #42634f;border-radius:8px;padding:11px 16px;cursor:pointer;">Stop Camera</button>
+  </div>
+
+  <div id="ew-qr-reader" style="width:100%;max-width:480px;margin:12px auto;overflow:hidden;border-radius:10px;"></div>
+
+  <label for="ew-qr-file" style="display:block;margin:18px 0 8px;font-weight:bold;">🖼️ Or upload a QR code image</label>
+  <input id="ew-qr-file" type="file" accept="image/*" style="max-width:100%;color:#e8fff1;">
+  <p id="ew-qr-status" role="status" aria-live="polite" style="color:#9de8b8;margin:14px 0;">Ready to scan. Choose an option above.</p>
+
+  <div id="ew-qr-result-box" hidden style="background:#0a100d;border:1px solid #245c3d;border-radius:10px;padding:14px;margin-top:14px;">
+    <strong style="color:#39e68c;">Scanned result</strong>
+    <textarea id="ew-qr-result" readonly rows="3" style="display:block;box-sizing:border-box;width:100%;margin:10px 0;background:#17221b;color:#fff;border:1px solid #42634f;border-radius:7px;padding:10px;resize:vertical;"></textarea>
+    <button id="ew-qr-copy" type="button" style="background:#167b49;color:white;border:0;border-radius:8px;padding:10px 14px;cursor:pointer;">📋 Copy Result</button>
+    <a id="ew-qr-open" target="_blank" rel="noopener noreferrer" hidden style="margin-left:10px;color:#39e68c;">Open link ↗</a>
+  </div>
+</section>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+(function () {
+  const root = document.getElementById("ew-qr-scanner");
+  if (!root || root.dataset.initialized) return;
+  root.dataset.initialized = "true";
+
+  const startBtn = root.querySelector("#ew-qr-start");
+  const stopBtn = root.querySelector("#ew-qr-stop");
+  const fileInput = root.querySelector("#ew-qr-file");
+  const status = root.querySelector("#ew-qr-status");
+  const resultBox = root.querySelector("#ew-qr-result-box");
+  const resultArea = root.querySelector("#ew-qr-result");
+  const copyBtn = root.querySelector("#ew-qr-copy");
+  const openLink = root.querySelector("#ew-qr-open");
+  const readerId = "ew-qr-reader";
+
+  let scanner = null;
+  let cameraRunning = false;
+  let starting = false;
+  let lastResult = "";
+
+  function showResult(decodedText) {
+    if (!decodedText) return;
+    lastResult = decodedText;
+    resultArea.value = decodedText;
+    resultBox.hidden = false;
+
+    // Only offer a link for ordinary web URLs.
+    if (/^https?:\/\/\S+$/i.test(decodedText)) {
+      openLink.href = decodedText;
+      openLink.hidden = false;
+    } else {
+      openLink.removeAttribute("href");
+      openLink.hidden = true;
+    }
+
+    status.textContent = "✅ QR code scanned successfully!";
+  }
+
+  async function stopCamera() {
+    if (!scanner || !cameraRunning) return;
+    try {
+      await scanner.stop();
+      cameraRunning = false;
+      status.textContent = "Camera stopped.";
+    } catch (error) {
+      status.textContent = "Couldn't stop the camera cleanly. You can try again.";
+    }
+  }
+
+  startBtn.addEventListener("click", async function () {
+    if (starting || cameraRunning) return;
+    starting = true;
+    startBtn.disabled = true;
+    status.textContent = "Starting camera… Please allow camera access.";
+
+    try {
+      if (typeof Html5Qrcode === "undefined") {
+        throw new Error("Scanner library failed to load. Check your internet connection and refresh.");
+      }
+
+      if (!scanner) scanner = new Html5Qrcode(readerId);
+
+      await scanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        function (decodedText) {
+          if (decodedText && decodedText !== lastResult) {
+            showResult(decodedText);
+          }
+        },
+        function () {}
+      );
+
+      cameraRunning = true;
+      status.textContent = "Camera is on. Point it at a QR code.";
+    } catch (error) {
+      status.textContent = "Camera couldn't start. Allow camera permission, use HTTPS, or try uploading an image. " +
+        (error && error.message ? error.message : "");
+    } finally {
+      starting = false;
+      startBtn.disabled = false;
+    }
+  });
+
+  stopBtn.addEventListener("click", stopCamera);
+
+  fileInput.addEventListener("change", async function () {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+
+    status.textContent = "Checking image for a QR code…";
+    try {
+      if (typeof Html5Qrcode === "undefined") {
+        throw new Error("Scanner library failed to load. Check your internet connection and refresh.");
+      }
+      if (cameraRunning) await stopCamera();
+
+      const imageScanner = new Html5Qrcode(readerId);
+      const decodedText = await imageScanner.scanFile(file, true);
+      showResult(decodedText);
+    } catch (error) {
+      status.textContent = "No QR code found, or the image couldn't be read. Try a clear, well-lit QR image.";
+    } finally {
+      fileInput.value = "";
+    }
+  });
+
+  copyBtn.addEventListener("click", async function () {
+    if (!lastResult) return;
+    try {
+      await navigator.clipboard.writeText(lastResult);
+      status.textContent = "✅ Result copied to clipboard!";
+    } catch (error) {
+      resultArea.focus();
+      resultArea.select();
+      status.textContent = "Select the result and copy it with Ctrl+C.";
+    }
+  });
+})();
+</script>
+
     <h3 style="margin-top:35px;">🌐 More free online tools</h3>
     <p>These tools open on external websites. Their free features and usage limits may change.</p>
     <div class="grid">

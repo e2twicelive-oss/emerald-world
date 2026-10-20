@@ -327,6 +327,134 @@
           Discover more, learn more and enjoy more, all in one place.
         </p>
 
+<!-- Emerald World Smart Search -->
+<div id="ew-smart-search" style="max-width:650px;margin:25px auto;position:relative;text-align:left;">
+  <label for="ew-search-input" style="display:block;color:#39e68c;font-weight:bold;margin-bottom:10px;">
+    🔎 Find something in Emerald World
+  </label>
+
+  <div style="display:flex;gap:8px;align-items:center;background:#101814;border:1px solid #28754c;border-radius:14px;padding:8px;">
+    <input
+      id="ew-search-input"
+      type="search"
+      placeholder="Search tools, games, study, blogs..."
+      autocomplete="off"
+      style="flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;padding:12px;font-size:16px;"
+    >
+    <button id="ew-search-clear" type="button" aria-label="Clear search"
+      style="background:#176b45;color:white;border:0;border-radius:9px;padding:11px 14px;cursor:pointer;">
+      Clear
+    </button>
+  </div>
+
+  <div id="ew-search-results" role="status" aria-live="polite"
+    style="display:none;position:relative;margin-top:10px;background:#101814;border:1px solid #28754c;border-radius:12px;padding:8px;color:#e8fff1;max-height:360px;overflow:auto;">
+  </div>
+</div>
+
+<script>
+(function () {
+  const input = document.getElementById("ew-search-input");
+  const results = document.getElementById("ew-search-results");
+  const clear = document.getElementById("ew-search-clear");
+
+  if (!input || !results || !clear || input.dataset.ready) return;
+  input.dataset.ready = "true";
+
+  // Add or update entries here as Emerald World grows.
+  const pages = [
+    { title: "Home", category: "Explore", keywords: "welcome emerald world free everything", url: "#home" },
+    { title: "Explore", category: "Explore", keywords: "discover all sections", url: "#explore" },
+    { title: "Games", category: "Games", keywords: "play browser games entertainment", url: "#games" },
+    { title: "Study", category: "Study", keywords: "learning education school study resources", url: "#study" },
+    { title: "Tools", category: "Tools", keywords: "free online tools utilities", url: "#tools" },
+    { title: "Blogs", category: "Blogs", keywords: "articles guides gaming news", url: "#blogs" },
+    { title: "About Emerald World", category: "About", keywords: "mission story future plans", url: "#about" },
+
+    { title: "Word Counter", category: "Tools", keywords: "count words characters sentences", url: "#tools" },
+    { title: "Text Case Converter", category: "Tools", keywords: "uppercase lowercase title case text", url: "#tools" },
+    { title: "Simple Calculator", category: "Tools", keywords: "math addition subtraction multiplication division", url: "#tools" },
+    { title: "QR Code Generator", category: "Tools", keywords: "create make generate qr code", url: "#tools" },
+    { title: "QR Code Scanner", category: "Tools", keywords: "scan read decode qr code camera image", url: "#tools" },
+    { title: "PDF Merger", category: "Tools", keywords: "combine merge pdf documents", url: "#tools" },
+    { title: "Image Resizer", category: "Tools", keywords: "resize change image dimensions", url: "#tools" },
+    { title: "Password Generator", category: "Tools", keywords: "create random secure password", url: "#tools" },
+    { title: "Word to PDF Converter", category: "Tools", keywords: "convert docx word document pdf", url: "#tools" },
+    { title: "Image Compressor", category: "Tools", keywords: "compress reduce image file size", url: "#tools" },
+    { title: "Typing Speed Test", category: "Tools", keywords: "typing speed wpm accuracy test", url: "#tools" },
+    { title: "Image to PDF Converter", category: "Tools", keywords: "convert pictures photos jpg png pdf", url: "#tools" },
+    { title: "Text to Speech", category: "Tools", keywords: "read text aloud voice speech", url: "#tools" }
+  ];
+
+  function render() {
+    const query = input.value.trim().toLowerCase();
+    results.replaceChildren();
+
+    if (!query) {
+      results.style.display = "none";
+      return;
+    }
+
+    const matches = pages.filter(page =>
+      (page.title + " " + page.category + " " + page.keywords)
+        .toLowerCase().includes(query)
+    ).slice(0, 10);
+
+    results.style.display = "block";
+
+    if (!matches.length) {
+      const message = document.createElement("p");
+      message.textContent = "No matches yet. Try another keyword.";
+      message.style.cssText = "padding:8px;margin:0;color:#b8d9c5;";
+      results.appendChild(message);
+      return;
+    }
+
+    matches.forEach(page => {
+      const link = document.createElement("a");
+      link.href = page.url;
+      link.style.cssText = "display:block;padding:12px;border-radius:8px;color:#e8fff1;text-decoration:none;border-bottom:1px solid #263c2e;";
+      link.addEventListener("mouseenter", () => link.style.background = "#1b3023");
+      link.addEventListener("mouseleave", () => link.style.background = "transparent");
+
+      const title = document.createElement("strong");
+      title.textContent = page.title;
+
+      const category = document.createElement("span");
+      category.textContent = "  ·  " + page.category;
+      category.style.cssText = "color:#39e68c;font-size:13px;";
+
+      link.append(title, category);
+      link.addEventListener("click", () => {
+        results.style.display = "none";
+      });
+      results.appendChild(link);
+    });
+  }
+
+  input.addEventListener("input", render);
+
+  clear.addEventListener("click", () => {
+    input.value = "";
+    render();
+    input.focus();
+  });
+
+  document.addEventListener("click", event => {
+    if (!event.target.closest("#ew-smart-search")) {
+      results.style.display = "none";
+    }
+  });
+
+  input.addEventListener("keydown", event => {
+    if (event.key === "Escape") {
+      results.style.display = "none";
+      input.blur();
+    }
+  });
+})();
+</script>
+
         <div class="buttons">
           <a class="btn btn-primary" href="#explore">Explore Emerald World ↗</a>
           <a class="btn btn-secondary" href="#about">Our Story</a>

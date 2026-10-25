@@ -1221,5 +1221,340 @@
 })();
 </script>
 <!-- END EMERALD WORLD RATING WIDGET -->
+
+<!-- 🌿 EMERALD WORLD: INTERACTIVE PORTAL + LIVING PARTICLES -->
+<style>
+  .ew-portal-host {
+    position: relative !important;
+    isolation: isolate;
+  }
+
+  .ew-portal-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ew-portal-host > *:not(.ew-portal-canvas):not(.ew-portal-button) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ew-portal-button {
+    position: absolute;
+    right: clamp(12px, 3vw, 35px);
+    bottom: 18px;
+    z-index: 5;
+    width: clamp(68px, 9vw, 104px);
+    aspect-ratio: 1;
+    border: 1px solid rgba(91,255,177,.8);
+    border-radius: 50%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      #7affb6 0%,
+      #16b969 13%,
+      #064a2d 38%,
+      #031a12 68%,
+      #020d09 100%
+    );
+    box-shadow:
+      0 0 14px #16d97988,
+      0 0 34px #16d97944,
+      inset 0 0 20px #36ff9b55;
+    color: #eafff2;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: box-shadow .25s ease, filter .25s ease;
+  }
+
+  .ew-portal-button::before,
+  .ew-portal-button::after {
+    content: "";
+    position: absolute;
+    inset: 8%;
+    border: 1px solid #76ffb6aa;
+    border-radius: 44% 56% 48% 52%;
+    box-shadow: 0 0 12px #32ff9b55;
+    animation: ewPortalSpin 9s linear infinite;
+    pointer-events: none;
+  }
+
+  .ew-portal-button::after {
+    inset: 17%;
+    border-color: #9bffe0aa;
+    border-radius: 55% 45% 57% 43%;
+    animation-direction: reverse;
+    animation-duration: 6s;
+  }
+
+  .ew-portal-button:hover {
+    filter: brightness(1.2);
+    box-shadow:
+      0 0 24px #16d979bb,
+      0 0 55px #16d97977,
+      inset 0 0 25px #36ff9b88;
+  }
+
+  .ew-portal-button:focus-visible {
+    outline: 2px solid #aaffd1;
+    outline-offset: 5px;
+  }
+
+  .ew-portal-core {
+    font-size: clamp(23px, 3.2vw, 38px);
+    line-height: 1;
+    filter: drop-shadow(0 0 9px #baffd8);
+    pointer-events: none;
+    animation: ewCorePulse 3s ease-in-out infinite;
+  }
+
+  .ew-portal-hint {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    width: max-content;
+    max-width: 170px;
+    padding: 6px 10px;
+    border: 1px solid #28754d;
+    border-radius: 9px;
+    background: #07170f;
+    color: #a8ffd0;
+    font: 600 11px/1.4 system-ui, sans-serif;
+    letter-spacing: .4px;
+    box-shadow: 0 4px 18px #0005;
+    pointer-events: none;
+  }
+
+  .ew-portal-button.ew-portal-burst {
+    animation: ewPortalBurst .55s ease-out;
+  }
+
+  @keyframes ewPortalSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes ewCorePulse {
+    0%, 100% { transform: scale(.94); opacity: .85; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+
+  @keyframes ewPortalBurst {
+    50% { transform: scale(1.13); filter: brightness(1.7); }
+  }
+
+  @media (max-width: 520px) {
+    .ew-portal-button {
+      width: 66px;
+      right: 12px;
+      bottom: 12px;
+    }
+
+    .ew-portal-hint { font-size: 10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ew-portal-button::before,
+    .ew-portal-button::after,
+    .ew-portal-core {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+(() => {
+  // Avoid adding the effect twice.
+  if (window.__emeraldPortalInstalled) return;
+
+  function installEmeraldPortal() {
+    const hero = document.querySelector(
+      '#hero, .hero-section, .home-hero, .hero, [class*="hero"]'
+    ) || document.querySelector('main section, main');
+
+    if (!hero) {
+      console.warn(
+        'Emerald Portal: Could not find the homepage hero section.'
+      );
+      return;
+    }
+
+    window.__emeraldPortalInstalled = true;
+    hero.classList.add('ew-portal-host');
+
+    // Animated background canvas.
+    const canvas = document.createElement('canvas');
+    canvas.className = 'ew-portal-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    hero.prepend(canvas);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let particles = [];
+    let bursts = [];
+    let animationFrame = 0;
+
+    const reducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    function resize() {
+      const rect = hero.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      width = Math.max(1, rect.width);
+      height = Math.max(1, rect.height);
+
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const count = reducedMotion
+        ? 12
+        : Math.min(65, Math.max(20, Math.round(width / 17)));
+
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: Math.random() * 2 + .5,
+        speed: Math.random() * .32 + .08,
+        drift: (Math.random() - .5) * .35,
+        phase: Math.random() * Math.PI * 2,
+        alpha: Math.random() * .42 + .12
+      }));
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, width, height);
+
+      // Gentle ambient emerald glow.
+      const glow = ctx.createRadialGradient(
+        width * .72, height * .55, 0,
+        width * .72, height * .55, Math.max(width, height) * .55
+      );
+
+      glow.addColorStop(0, 'rgba(12, 180, 92, 0.075)');
+      glow.addColorStop(1, 'rgba(3, 20, 12, 0)');
+
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, width, height);
+
+      particles.forEach(p => {
+        if (!reducedMotion) {
+          p.y -= p.speed;
+          p.x += p.drift + Math.sin(p.phase) * .12;
+          p.phase += .012;
+
+          if (p.y < -5) {
+            p.y = height + 5;
+            p.x = Math.random() * width;
+          }
+          if (p.x < -5) p.x = width + 5;
+          if (p.x > width + 5) p.x = -5;
+        }
+
+        const alpha = p.alpha *
+          (reducedMotion ? 1 : .72 + Math.sin(p.phase) * .28);
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(94, 255, 165, ${alpha})`;
+        ctx.shadowColor = '#39ff98';
+        ctx.shadowBlur = p.r > 1.7 ? 8 : 3;
+        ctx.fill();
+      });
+
+      ctx.shadowBlur = 0;
+
+      // Ripples released when the portal is clicked.
+      bursts = bursts.filter(b => b.life > 0);
+
+      bursts.forEach(b => {
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(83, 255, 165, ${b.life * .7})`;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#39ff98';
+        ctx.shadowBlur = 12;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        if (!reducedMotion) {
+          b.radius += 2.3;
+          b.life -= .025;
+        }
+      });
+
+      if (!reducedMotion) {
+        animationFrame = requestAnimationFrame(draw);
+      }
+    }
+
+    resize();
+    draw();
+
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(resize).observe(hero);
+    } else {
+      window.addEventListener('resize', resize);
+    }
+
+    // Interactive portal button.
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'ew-portal-button';
+    button.setAttribute('aria-label', 'Activate the Emerald Portal');
+    button.title = 'Activate the Emerald Portal';
+
+    button.innerHTML = `
+      <span class="ew-portal-core" aria-hidden="true">✦</span>
+      <span class="ew-portal-hint">✧ Activate Portal</span>
+    `;
+
+    hero.appendChild(button);
+
+    button.addEventListener('click', () => {
+      const buttonRect = button.getBoundingClientRect();
+      const heroRect = hero.getBoundingClientRect();
+
+      const x = buttonRect.left + buttonRect.width / 2 -
+        heroRect.left;
+      const y = buttonRect.top + buttonRect.height / 2 -
+        heroRect.top;
+
+      for (let i = 0; i < 4; i++) {
+        bursts.push({
+          x, y,
+          radius: 4 + i * 7,
+          life: 1
+        });
+      }
+
+      button.classList.remove('ew-portal-burst');
+      void button.offsetWidth;
+      button.classList.add('ew-portal-burst');
+
+      if (reducedMotion) draw();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded', installEmeraldPortal, { once: true }
+    );
+  } else {
+    installEmeraldPortal();
+  }
+})();
+</script>
+<!-- END EMERALD WORLD PORTAL -->
 </body>
 </html>

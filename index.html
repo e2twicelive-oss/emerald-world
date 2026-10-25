@@ -2619,5 +2619,418 @@ onmouseleave="this.style.boxShadow='0 0 12px rgba(0,255,100,0.08)';this.style.bo
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
   </script>
+
+<!-- 🌿 EMERALD WORLD — WEBSITE RATING WIDGET -->
+<style>
+  #ew-rating {
+    --ew-green: #20e89a;
+    --ew-cyan: #37d9f5;
+    --ew-bg: #07140f;
+    --ew-card: #0c1d16;
+    box-sizing: border-box;
+    width: min(100% - 32px, 850px);
+    margin: 55px auto 30px;
+    color: #e7fff3;
+    font-family: inherit;
+  }
+
+  #ew-rating * {
+    box-sizing: border-box;
+  }
+
+  #ew-rating .ew-rate-card {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(22px, 5vw, 42px);
+    background:
+      radial-gradient(ellipse at top right, #123d2c 0%, transparent 48%),
+      linear-gradient(145deg, #0d2118, #07100d 75%);
+    border: 1px solid #1b6548;
+    border-radius: 22px;
+    box-shadow: 0 0 30px #00ff8010, inset 0 0 25px #00ff8006;
+  }
+
+  #ew-rating .ew-rate-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 12%;
+    width: 76%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--ew-green), var(--ew-cyan), transparent);
+  }
+
+  #ew-rating .ew-rate-label {
+    display: inline-block;
+    padding: 7px 12px;
+    border: 1px solid #237851;
+    border-radius: 30px;
+    color: var(--ew-green);
+    background: #0c3021;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.7px;
+  }
+
+  #ew-rating .ew-rate-title {
+    margin: 18px 0 10px;
+    color: #f0fff7;
+    font-size: clamp(25px, 4vw, 36px);
+    font-weight: 850;
+    line-height: 1.2;
+    letter-spacing: -0.8px;
+  }
+
+  #ew-rating .ew-rate-title span {
+    color: var(--ew-green);
+  }
+
+  #ew-rating .ew-rate-description {
+    max-width: 540px;
+    margin: 0 auto 25px;
+    color: #a9c9b8;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  #ew-rating .ew-rate-center {
+    text-align: center;
+  }
+
+  #ew-rating .ew-stars {
+    display: flex;
+    justify-content: center;
+    gap: clamp(5px, 2vw, 13px);
+    margin: 15px 0 8px;
+  }
+
+  #ew-rating .ew-star {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #496456;
+    font-family: Arial, sans-serif;
+    font-size: clamp(34px, 8vw, 48px);
+    line-height: 1.25;
+    cursor: pointer;
+    transition: color .18s ease, transform .18s ease;
+  }
+
+  #ew-rating .ew-star:hover {
+    transform: translateY(-4px) scale(1.08);
+    color: #ffd166;
+  }
+
+  #ew-rating .ew-star.is-active {
+    color: #ffd166;
+    text-shadow: 0 0 18px #ffd16645;
+  }
+
+  #ew-rating .ew-star:focus-visible,
+  #ew-rating button:focus-visible,
+  #ew-rating input:focus-visible,
+  #ew-rating textarea:focus-visible {
+    outline: 2px solid var(--ew-cyan);
+    outline-offset: 4px;
+  }
+
+  #ew-rating .ew-rating-caption {
+    min-height: 22px;
+    color: #a6c9b5;
+    font-size: 13px;
+    margin-bottom: 23px;
+  }
+
+  #ew-rating .ew-field-label {
+    display: block;
+    margin: 16px 0 8px;
+    color: #d9f7e6;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: left;
+  }
+
+  #ew-rating .ew-input,
+  #ew-rating .ew-textarea {
+    display: block;
+    width: 100%;
+    padding: 13px 15px;
+    border: 1px solid #254a38;
+    border-radius: 11px;
+    background: #07130e;
+    color: #eafff2;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  #ew-rating .ew-input:focus,
+  #ew-rating .ew-textarea:focus {
+    border-color: var(--ew-green);
+    box-shadow: 0 0 0 3px #20e89a12;
+  }
+
+  #ew-rating .ew-textarea {
+    min-height: 115px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  #ew-rating .ew-input::placeholder,
+  #ew-rating .ew-textarea::placeholder {
+    color: #668574;
+  }
+
+  #ew-rating .ew-submit {
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px 20px;
+    border: 1px solid var(--ew-green);
+    border-radius: 12px;
+    background: linear-gradient(100deg, #12b975, #19d995);
+    color: #04160d;
+    font-size: 14px;
+    font-weight: 850;
+    cursor: pointer;
+    box-shadow: 0 0 20px #20e89a18;
+    transition: transform .2s, box-shadow .2s, filter .2s;
+  }
+
+  #ew-rating .ew-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px #20e89a35;
+    filter: brightness(1.08);
+  }
+
+  #ew-rating .ew-private-note {
+    margin: 14px 0 0;
+    color: #789b87;
+    font-size: 11px;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  #ew-rating .ew-status {
+    display: none;
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid #246947;
+    border-radius: 10px;
+    color: #baffd9;
+    background: #0b2b1c;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  #ew-rating .ew-status.is-visible {
+    display: block;
+  }
+
+  #ew-rating .ew-rate-footer {
+    margin-top: 19px;
+    color: #648774;
+    font-size: 11px;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 480px) {
+    #ew-rating {
+      width: calc(100% - 22px);
+      margin-top: 35px;
+    }
+
+    #ew-rating .ew-rate-card {
+      border-radius: 17px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #ew-rating *,
+    #ew-rating *::before {
+      transition: none !important;
+    }
+  }
+</style>
+
+<section id="ew-rating" aria-labelledby="ew-rating-heading">
+  <div class="ew-rate-card">
+    <div class="ew-rate-center">
+      <span class="ew-rate-label">🌿 COMMUNITY FEEDBACK</span>
+
+      <h2 class="ew-rate-title" id="ew-rating-heading">
+        Rate <span>Emerald World</span>
+      </h2>
+
+      <p class="ew-rate-description">
+        Enjoying your experience? Leave a rating and share your thoughts.
+        Your feedback helps Emerald World grow! ✨
+      </p>
+
+      <div class="ew-stars" role="group" aria-label="Choose a rating">
+        <button class="ew-star" type="button" data-rating="1"
+          aria-label="1 star" aria-pressed="false">★</button>
+        <button class="ew-star" type="button" data-rating="2"
+          aria-label="2 stars" aria-pressed="false">★</button>
+        <button class="ew-star" type="button" data-rating="3"
+          aria-label="3 stars" aria-pressed="false">★</button>
+        <button class="ew-star" type="button" data-rating="4"
+          aria-label="4 stars" aria-pressed="false">★</button>
+        <button class="ew-star" type="button" data-rating="5"
+          aria-label="5 stars" aria-pressed="false">★</button>
+      </div>
+
+      <div class="ew-rating-caption" id="ew-rating-caption"
+        aria-live="polite">Select your rating ⭐</div>
+    </div>
+
+    <form id="ew-rating-form">
+      <label class="ew-field-label" for="ew-rating-name">
+        Your name (optional)
+      </label>
+      <input class="ew-input" id="ew-rating-name" type="text"
+        maxlength="80" placeholder="Enter your name">
+
+      <label class="ew-field-label" for="ew-rating-feedback">
+        Your feedback
+      </label>
+      <textarea class="ew-textarea" id="ew-rating-feedback"
+        maxlength="2000" placeholder="What do you like? What can we improve?"
+        required></textarea>
+
+      <button class="ew-submit" type="submit">
+        ✉️ Submit Your Rating
+      </button>
+
+      <div class="ew-status" id="ew-rating-status"
+        role="status" aria-live="polite"></div>
+
+      <p class="ew-private-note">
+        Your email app will open with your rating and feedback ready.
+        You can review the message before sending it.
+      </p>
+    </form>
+
+    <div class="ew-rate-footer">
+      EMERALD WORLD · ONE WEBSITE. MORE POSSIBILITIES.
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  "use strict";
+
+  // ✉️ CHANGE THIS EMAIL ADDRESS ANYTIME IN THE FUTURE.
+  const OWNER_EMAIL = "YOUR_EMAIL@example.com";
+
+  const root = document.getElementById("ew-rating");
+  if (!root) return;
+
+  const stars = Array.from(root.querySelectorAll(".ew-star"));
+  const caption = document.getElementById("ew-rating-caption");
+  const form = document.getElementById("ew-rating-form");
+  const feedback = document.getElementById("ew-rating-feedback");
+  const nameField = document.getElementById("ew-rating-name");
+  const status = document.getElementById("ew-rating-status");
+
+  const descriptions = [
+    "",
+    "😕 Needs improvement",
+    "😐 It's okay",
+    "🙂 Good experience",
+    "🤩 Really great!",
+    "💚 Absolutely amazing!"
+  ];
+
+  let selectedRating = 0;
+
+  function updateStars(rating) {
+    stars.forEach(function (star) {
+      const value = Number(star.dataset.rating);
+      const active = value <= rating;
+      star.classList.toggle("is-active", active);
+      star.setAttribute("aria-pressed", String(value === rating));
+    });
+
+    caption.textContent = rating
+      ? descriptions[rating]
+      : "Select your rating ⭐";
+  }
+
+  stars.forEach(function (star) {
+    star.addEventListener("click", function () {
+      selectedRating = Number(star.dataset.rating);
+      updateStars(selectedRating);
+      status.classList.remove("is-visible");
+    });
+  });
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    if (!selectedRating) {
+      status.textContent = "⭐ Please select a star rating first.";
+      status.classList.add("is-visible");
+      return;
+    }
+
+    const message = feedback.value.trim();
+    if (!message) {
+      feedback.focus();
+      status.textContent = "💬 Please write your feedback first.";
+      status.classList.add("is-visible");
+      return;
+    }
+
+    if (
+      !OWNER_EMAIL ||
+      OWNER_EMAIL === "YOUR_EMAIL@example.com" ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(OWNER_EMAIL)
+    ) {
+      status.textContent =
+        "⚙️ Website owner: replace YOUR_EMAIL@example.com " +
+        "in the code with your email address before publishing.";
+      status.classList.add("is-visible");
+      return;
+    }
+
+    const visitorName = nameField.value.trim() || "Anonymous";
+    const subject = "Emerald World — New Website Rating (" +
+      selectedRating + "/5 stars)";
+
+    const body = [
+      "New feedback for Emerald World",
+      "",
+      "Rating: " + "★".repeat(selectedRating) +
+        "☆".repeat(5 - selectedRating) +
+        " (" + selectedRating + "/5)",
+      "Name: " + visitorName,
+      "",
+      "Feedback:",
+      message,
+      "",
+      "Sent from the Emerald World website rating form."
+    ].join("\n");
+
+    const mailto = "mailto:" + OWNER_EMAIL +
+      "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+
+    status.textContent =
+      "📧 Opening your email app. Review the message and press " +
+      "Send there to deliver your feedback.";
+
+    status.classList.add("is-visible");
+
+    // Opens the visitor's configured email application.
+    window.location.href = mailto;
+  });
+})();
+</script>
+<!-- END EMERALD WORLD RATING WIDGET -->
 </body>
 </html>
